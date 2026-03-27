@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: nexora_mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: nexora
+    networks:
+      - nexora_net
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: nexora_server
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - nexora_net
+
+volumes:
+  mongo_data:
+
+networks:
+  nexora_net:
+    driver: bridge
