@@ -23,6 +23,8 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/projects", require("./routes/project.routes"));
 app.use("/api/endpoints", require("./routes/endpoint.routes"));
 app.use('/api/keys', require('./routes/key.routes'));
+app.use('/api/usage',  require('./routes/usage.routes'));
+app.use('/gateway',    require('./routes/gateway.routes'));
 
 app.get("/api/health", (req, res) => {
   res.json({
