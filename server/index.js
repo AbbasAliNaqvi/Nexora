@@ -22,6 +22,7 @@ if (process.env.NODE_ENV !== "test") app.use(morgan("dev"));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/projects", require("./routes/project.routes"));
 app.use("/api/endpoints", require("./routes/endpoint.routes"));
+app.use('/api/keys', require('./routes/key.routes'));
 
 app.get("/api/health", (req, res) => {
   res.json({

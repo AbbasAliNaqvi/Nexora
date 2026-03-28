@@ -3,6 +3,7 @@ const { body } = require("express-validator");
 const router = express.Router();
 const pCtrl = require("../controllers/project.controller");
 const eCtrl = require("../controllers/endpoint.controller");
+const kCtrl = require("../controllers/key.controller");
 const { protect } = require("../middleware/auth");
 
 router.use(protect);
@@ -29,5 +30,8 @@ router.post(
   ],
   eCtrl.createEndpoint,
 );
+
+router.get("/:id/keys", kCtrl.getKeys);
+router.post("/:id/keys", kCtrl.createKey);
 
 module.exports = router;
