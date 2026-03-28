@@ -25,6 +25,7 @@ app.use("/api/endpoints", require("./routes/endpoint.routes"));
 app.use('/api/keys', require('./routes/key.routes'));
 app.use('/api/usage',  require('./routes/usage.routes'));
 app.use('/gateway',    require('./routes/gateway.routes'));
+app.use('/api/ai',        require('./routes/ai.routes'));
 
 app.get("/api/health", (req, res) => {
   res.json({
