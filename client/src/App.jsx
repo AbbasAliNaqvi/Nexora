@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/app/Dashboard";
 import Projects from "./pages/app/Projects";
+import ProjectWorkspace from "./pages/app/ProjectWorkspace";
 import APIBuilder from "./pages/app/APIBuilder";
 import Keys from "./pages/app/Keys";
 import Usage from "./pages/app/Usage";
@@ -37,7 +38,7 @@ function Loader() {
           width: 24,
           height: 24,
           border: "2px solid rgba(255,255,255,0.1)",
-          borderTopColor: "#10b981",
+          borderTopColor: "var(--brand)",
           borderRadius: "50%",
           animation: "spin 0.6s linear infinite",
         }}
@@ -80,6 +81,7 @@ export default function App() {
         >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="projects" element={<Projects />} />
+          <Route path="projects/:id" element={<ProjectWorkspace />} />
           <Route path="projects/:id/builder" element={<APIBuilder />} />
           <Route path="projects/:id/keys" element={<Keys />} />
           <Route path="usage" element={<Usage />} />

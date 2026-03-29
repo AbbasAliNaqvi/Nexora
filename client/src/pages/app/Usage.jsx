@@ -44,8 +44,8 @@ function AreaChart({ data = [] }) {
     >
       <defs>
         <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity=".18" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--brand)" stopOpacity=".18" />
+          <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ef4444" stopOpacity=".12" />
@@ -56,7 +56,7 @@ function AreaChart({ data = [] }) {
       <polyline
         points={line(rPts)}
         fill="none"
-        stroke="#10b981"
+        stroke="var(--brand-dark)"
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -118,8 +118,8 @@ function BarChart({ data = [] }) {
 
 function DonutChart({ data = [] }) {
   const C = {
-    "2xx": "#10b981",
-    "3xx": "#3b82f6",
+    "2xx": "var(--brand-dark)",
+    "3xx": "var(--blue)",
     "4xx": "#f59e0b",
     "5xx": "#ef4444",
   };

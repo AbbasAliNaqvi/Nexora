@@ -13,7 +13,7 @@
   background:
     radial-gradient(
       ellipse 60% 50% at 70% 50%,
-      rgba(16, 185, 129, 0.04) 0%,
+      rgba(212, 161, 106, 0.08) 0%,
       transparent 70%
     ),
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -32,9 +32,10 @@
 }
 
 .auth-logo {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.08em;
   color: var(--text-1);
   transition: color 0.15s;
 }
@@ -250,7 +251,7 @@
 .auth-quote {
   padding: 2rem;
   border-left: 2px solid var(--brand-border);
-  background: rgba(16, 185, 129, 0.02);
+  background: rgba(212, 161, 106, 0.04);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 .auth-quote-text {

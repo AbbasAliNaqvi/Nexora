@@ -1,10 +1,28 @@
 body {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--text-1);
   font-size: 1rem;
   line-height: 1.6;
   overflow-x: hidden;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button {
+  border: 0;
+  background: none;
+}
+code,
+pre {
+  font-family: var(--font-mono);
 }
 ::selection {
   background: var(--brand-dim);
@@ -36,9 +54,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.85rem;
-  font-weight: 400;
+  font-weight: 600;
   padding: 0.7rem 1.5rem;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
@@ -53,8 +71,7 @@ body {
 }
 .btn-primary {
   background: var(--brand);
-  color: #000;
-  font-weight: 500;
+  color: #1f140b;
 }
 .btn-primary:hover {
   background: var(--brand-dark);
@@ -67,7 +84,7 @@ body {
 .btn-ghost:hover {
   border-color: var(--border-bright);
   color: var(--text-1);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 .btn-outline-brand {
   background: transparent;
@@ -113,9 +130,9 @@ body {
   color: #f59e0b;
 }
 .badge-blue {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
+  background: rgba(91, 136, 201, 0.1);
+  border-color: rgba(91, 136, 201, 0.2);
+  color: var(--blue);
 }
 
 .dot {

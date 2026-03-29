@@ -34,7 +34,7 @@ export default function Login() {
       <div className="auth-bg" aria-hidden />
       <header className="auth-header">
         <Link to="/" className="auth-logo">
-          ⚡ nexora
+          NEXORA
         </Link>
       </header>
       <main className="auth-main">

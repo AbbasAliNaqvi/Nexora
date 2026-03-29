@@ -5,6 +5,84 @@
   min-height: 40vh;
 }
 
+.dash-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.dash-hero-copy,
+.dash-hero-panel {
+  background: linear-gradient(180deg, rgba(255, 251, 244, 0.9), rgba(255, 251, 244, 0.72));
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 1.6rem;
+  box-shadow: 0 24px 60px rgba(28, 23, 18, 0.06);
+}
+
+.dash-hero-kicker {
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-dark);
+  margin-bottom: 0.9rem;
+}
+
+.dash-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: var(--text-1);
+  max-width: 12ch;
+}
+
+.dash-hero-text {
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--text-2);
+  max-width: 56ch;
+  margin-top: 0.9rem;
+}
+
+.dash-hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.4rem;
+}
+
+.dash-hero-terminal {
+  background: #17130f;
+  color: #f3ede2;
+  border-radius: 22px;
+  padding: 1.25rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.dash-hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(243, 237, 226, 0.65);
+}
+
+.dash-command {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -14,50 +92,60 @@
 
 .dash-body {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.8fr);
   gap: 1.5rem;
+}
+
+.dash-card-large {
+  min-height: 320px;
+}
+
+.card-title {
+  margin-top: 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text-1);
+  letter-spacing: -0.03em;
 }
 
 .chart-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
+
 .chart-label {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-2);
+  font-size: 0.68rem;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
+
 .chart-empty {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-4);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  color: var(--text-3);
   text-align: center;
   padding: 2rem 0;
 }
+
 .chart-dates {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-4);
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .link-sm {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--brand);
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-  opacity: 0.8;
-  transition: opacity 0.15s;
-}
-.link-sm:hover {
-  opacity: 1;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--brand-dark);
 }
 
 .dash-right {
@@ -68,105 +156,91 @@
 
 .section-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
-.section-head-title {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-3);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
-.proj-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.proj-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.65rem 0.75rem;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.proj-row:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-.proj-row-name {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--text-1);
-  display: block;
-}
-.proj-row-slug {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-4);
-}
-.proj-row-arrow {
-  color: var(--text-4);
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-.proj-row:hover .proj-row-arrow {
-  color: var(--brand);
-}
-
+.proj-list,
 .quick-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.55rem;
 }
+
+.proj-row,
 .quick-item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 0.65rem 0.75rem;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
   border: 1px solid transparent;
   transition:
     background 0.15s,
     border-color 0.15s;
 }
+
+.proj-row:hover,
 .quick-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(31, 24, 18, 0.03);
   border-color: var(--border);
 }
+
+.proj-row-name,
 .quick-item-label {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 700;
   color: var(--text-1);
+  display: block;
 }
+
+.proj-row-slug,
 .quick-item-desc {
   font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-3);
+}
+
+.proj-row-arrow {
+  font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-4);
+  color: var(--brand-dark);
+  flex-shrink: 0;
+}
+
+.quick-item {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 @media (max-width: 1024px) {
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .dash-hero,
   .dash-body {
     grid-template-columns: 1fr;
   }
+
   .dash-right {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
   }
 }
-@media (max-width: 600px) {
-  .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
+@media (max-width: 640px) {
+  .stat-grid,
   .dash-right {
     grid-template-columns: 1fr;
+  }
+
+  .dash-hero-copy,
+  .dash-hero-panel {
+    padding: 1.25rem;
   }
 }

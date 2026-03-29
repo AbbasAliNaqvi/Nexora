@@ -37,14 +37,14 @@ export default function Register() {
       : form.password.length < 10
         ? 2
         : 3;
-  const strengthColors = ["", "#ef4444", "#f59e0b", "#10b981"];
+  const strengthColors = ["", "#ef4444", "#f59e0b", "var(--brand-dark)"];
 
   return (
     <div className="auth-page">
       <div className="auth-bg" aria-hidden />
       <header className="auth-header">
         <Link to="/" className="auth-logo">
-          ⚡ nexora
+          NEXORA
         </Link>
       </header>
       <main className="auth-main">

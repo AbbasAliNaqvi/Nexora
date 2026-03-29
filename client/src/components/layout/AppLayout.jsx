@@ -97,16 +97,16 @@ const I = {
 };
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: "dashboard" },
+  { to: "/dashboard", label: "Overview", icon: "dashboard" },
   { to: "/projects", label: "Projects", icon: "projects" },
   { to: "/usage", label: "Usage", icon: "usage" },
-  { to: "/ai", label: "AI", icon: "ai" },
+  { to: "/ai", label: "AI Studio", icon: "ai" },
 ];
 
 const TIER_COLOR = {
   free: "var(--text-3)",
-  pro: "#3b82f6",
-  enterprise: "var(--brand)",
+  pro: "var(--blue)",
+  enterprise: "var(--brand-dark)",
 };
 
 export default function AppLayout() {
@@ -116,7 +116,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    const fn = () => setCollapsed(window.innerWidth < 1024);
+    const fn = () => setCollapsed(window.innerWidth < 1100);
     fn();
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
@@ -127,8 +127,13 @@ export default function AppLayout() {
       <aside className="sidebar">
         <div className="sidebar-top">
           <div className="sidebar-logo">
-            <span className="sidebar-logo-mark">⚡</span>
-            {!collapsed && <span className="sidebar-logo-text">nexora</span>}
+            <span className="sidebar-logo-mark">NX</span>
+            {!collapsed && (
+              <div className="sidebar-logo-copy">
+                <span className="sidebar-logo-text">NEXORA</span>
+                <span className="sidebar-logo-sub">Developer platform</span>
+              </div>
+            )}
           </div>
           <button
             className="sidebar-toggle"
@@ -145,6 +150,15 @@ export default function AppLayout() {
             </span>
           </button>
         </div>
+
+        {!collapsed && (
+          <div className="sidebar-intro">
+            <span className="sidebar-intro-label">Workspace</span>
+            <p className="sidebar-intro-copy">
+              Build, test, and ship API products from one calm control surface.
+            </p>
+          </div>
+        )}
 
         <nav className="sidebar-nav">
           {NAV.map(({ to, label, icon }) => (

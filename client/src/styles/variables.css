@@ -1,31 +1,33 @@
 :root {
-  --off-white: #e8e3db;
-  --brand: #10b981;
-  --brand-dark: #059669;
-  --brand-dim: rgba(16, 185, 129, 0.08);
-  --brand-border: rgba(16, 185, 129, 0.18);
+  --off-white: #f3ede2;
+  --brand: #d4a16a;
+  --brand-dark: #b8824c;
+  --brand-dim: rgba(212, 161, 106, 0.12);
+  --brand-border: rgba(212, 161, 106, 0.28);
 
   --bg: #000000;
-  --bg-1: #070707;
-  --bg-2: #0d0d0d;
-  --bg-card: #0a0a0a;
-  --bg-input: #0f0f0f;
+  --bg-1: #090909;
+  --bg-2: #111111;
+  --bg-card: #101010;
+  --bg-input: #131313;
 
-  --border: rgba(255, 255, 255, 0.06);
-  --border-bright: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.16);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.14);
+  --border-hover: rgba(255, 255, 255, 0.22);
 
-  --text-1: #e8e3db;
-  --text-2: #888888;
-  --text-3: #555555;
-  --text-4: #2a2a2a;
+  --text-1: #f4ecdf;
+  --text-2: #b2a89c;
+  --text-3: #756b61;
+  --text-4: #403932;
 
   --red: #ef4444;
   --amber: #f59e0b;
-  --blue: #3b82f6;
+  --blue: #5b88c9;
+  --violet: #8b74cc;
 
-  --font-display: "Syne", sans-serif;
-  --font-mono: "DM Mono", monospace;
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 
   --radius-xs: 3px;
   --radius-sm: 6px;

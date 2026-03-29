@@ -13,11 +13,13 @@ import {
 import "./Dashboard.css";
 
 function MiniChart({ data = [] }) {
-  if (data.length < 2)
+  if (data.length < 2) {
     return <div className="chart-empty">No traffic data yet.</div>;
-  const W = 600,
-    H = 80,
-    p = 6;
+  }
+
+  const W = 600;
+  const H = 80;
+  const p = 6;
   const max = Math.max(...data.map((d) => d.requests), 1);
   const pts = data.map((d, i) => ({
     x: p + (i / (data.length - 1)) * (W - p * 2),
@@ -33,7 +35,7 @@ function MiniChart({ data = [] }) {
     y:
       H -
       p -
-      (d.errors / Math.max(...data.map((d) => d.errors), 1)) * (H - p * 2),
+      (d.errors / Math.max(...data.map((x) => x.errors), 1)) * (H - p * 2),
   }));
   const errLine = errPts.map((pt) => `${pt.x},${pt.y}`).join(" ");
 
@@ -45,16 +47,16 @@ function MiniChart({ data = [] }) {
       style={{ display: "block", height: 80 }}
     >
       <defs>
-        <linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity=".18" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+        <linearGradient id="dashboard-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--brand)" stopOpacity=".2" />
+          <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} fill="url(#dg)" />
+      <path d={area} fill="url(#dashboard-area)" />
       <polyline
         points={line}
         fill="none"
-        stroke="#10b981"
+        stroke="var(--brand-dark)"
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -62,7 +64,7 @@ function MiniChart({ data = [] }) {
       <polyline
         points={errLine}
         fill="none"
-        stroke="#ef4444"
+        stroke="var(--red)"
         strokeWidth="1"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -71,21 +73,6 @@ function MiniChart({ data = [] }) {
     </svg>
   );
 }
-
-const IcArrow = (
-  <svg
-    width="13"
-    height="13"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-  >
-    <line x1="5" y1="12" x2="19" y2="12" />
-    <polyline points="12 5 19 12 12 19" />
-  </svg>
-);
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -109,11 +96,11 @@ export default function Dashboard() {
           );
           setChart(cRes.data.dailyStats || []);
         }
-      } catch {
       } finally {
         setLoad(false);
       }
     };
+
     load();
   }, []);
 
@@ -125,7 +112,7 @@ export default function Dashboard() {
           label: "Error rate",
           value: `${overview.errorRate}%`,
           accent:
-            parseFloat(overview.errorRate) > 5 ? "var(--red)" : "var(--brand)",
+            parseFloat(overview.errorRate) > 5 ? "var(--red)" : "var(--brand-dark)",
         },
         {
           label: "Avg latency",
@@ -138,8 +125,8 @@ export default function Dashboard() {
   return (
     <PageShell>
       <PageHeader
-        title={`Hey, ${user?.name?.split(" ")[0] ?? "developer"} ⚡`}
-        subtitle="Here's your API platform overview"
+        title={`Welcome back, ${user?.name?.split(" ")[0] ?? "developer"}`}
+        subtitle="A clean view of your API platform, active workspaces, and traffic."
       />
 
       {loading ? (
@@ -148,6 +135,35 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
+          <section className="dash-hero">
+            <div className="dash-hero-copy">
+              <span className="dash-hero-kicker">Nexora workspace</span>
+              <h2 className="dash-hero-title">
+                Build APIs that developers can actually use.
+              </h2>
+              <p className="dash-hero-text">
+                Create a project, define endpoints, issue keys, and monitor live
+                traffic without bouncing between dead screens.
+              </p>
+              <div className="dash-hero-actions">
+                <Link to="/projects" className="btn btn-primary">
+                  Open projects
+                </Link>
+                <Link to="/usage" className="btn btn-ghost">
+                  View analytics
+                </Link>
+              </div>
+            </div>
+            <div className="dash-hero-panel">
+              <div className="dash-hero-terminal">
+                <span className="dash-hero-label">Launch flow</span>
+                <div className="dash-command">1. Create a project workspace</div>
+                <div className="dash-command">2. Add endpoints in the builder</div>
+                <div className="dash-command">3. Generate keys and hit the gateway</div>
+              </div>
+            </div>
+          </section>
+
           <div className="stat-grid">
             {stats.map((s) => (
               <StatCard
@@ -160,11 +176,14 @@ export default function Dashboard() {
           </div>
 
           <div className="dash-body">
-            <Card>
+            <Card className="dash-card-large">
               <div className="chart-head">
-                <span className="chart-label">Requests — last 7 days</span>
+                <div>
+                  <span className="chart-label">Traffic pulse</span>
+                  <h3 className="card-title">Requests in the last 7 days</h3>
+                </div>
                 <Link to="/usage" className="link-sm">
-                  Full analytics {IcArrow}
+                  Full analytics
                 </Link>
               </div>
               <MiniChart data={chart} />
@@ -179,21 +198,20 @@ export default function Dashboard() {
             <div className="dash-right">
               <Card>
                 <div className="section-head">
-                  <span className="section-head-title">Recent projects</span>
+                  <div>
+                    <span className="chart-label">Projects</span>
+                    <h3 className="card-title">Recent workspaces</h3>
+                  </div>
                   <Link to="/projects" className="link-sm">
-                    All {IcArrow}
+                    See all
                   </Link>
                 </div>
                 {projects.length === 0 ? (
                   <EmptyState
                     title="No projects yet"
-                    desc="Create your first project"
+                    desc="Create your first project and make this dashboard useful."
                     action={
-                      <Link
-                        to="/projects"
-                        className="btn btn-primary"
-                        style={{ fontSize: ".8rem", padding: ".55rem 1.25rem" }}
-                      >
+                      <Link to="/projects" className="btn btn-primary">
                         Create project
                       </Link>
                     }
@@ -210,7 +228,7 @@ export default function Dashboard() {
                           <span className="proj-row-name">{p.name}</span>
                           <span className="proj-row-slug">/{p.slug}</span>
                         </div>
-                        <span className="proj-row-arrow">{IcArrow}</span>
+                        <span className="proj-row-arrow">Open</span>
                       </Link>
                     ))}
                   </div>
@@ -219,23 +237,26 @@ export default function Dashboard() {
 
               <Card>
                 <div className="section-head">
-                  <span className="section-head-title">Quick actions</span>
+                  <div>
+                    <span className="chart-label">Actions</span>
+                    <h3 className="card-title">Next steps</h3>
+                  </div>
                 </div>
                 <div className="quick-list">
                   {[
                     {
-                      label: "New project",
-                      desc: "Create an API namespace",
+                      label: "Create a new project",
+                      desc: "Start a fresh API workspace",
                       to: "/projects",
                     },
                     {
-                      label: "AI Assistant",
-                      desc: "Ask Nexora AI anything",
+                      label: "Use the AI assistant",
+                      desc: "Generate docs and review API health",
                       to: "/ai",
                     },
                     {
-                      label: "View usage",
-                      desc: "Full analytics breakdown",
+                      label: "Review traffic logs",
+                      desc: "Inspect usage and errors",
                       to: "/usage",
                     },
                   ].map((a) => (

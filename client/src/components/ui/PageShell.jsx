@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./PageShell.css";
 
 export function PageShell({ children }) {
@@ -74,10 +75,11 @@ export function Spinner({ size = 20, dark = false }) {
         height: size,
         borderRadius: "50%",
         flexShrink: 0,
+        color: dark ? "#1c1712" : "var(--brand)",
         border: dark
-          ? "2px solid rgba(0,0,0,.2)"
+          ? "2px solid rgba(28,23,18,.16)"
           : "2px solid rgba(255,255,255,.1)",
-        borderTopColor: dark ? "#000" : "#10b981",
+        borderTopColor: "currentColor",
         animation: "spin .6s linear infinite",
       }}
     />
@@ -177,15 +179,8 @@ export function BackLink({ to, label }) {
     </svg>
   );
   return (
-    <a
-      href={to}
-      className="back-link"
-      onClick={(e) => {
-        e.preventDefault();
-        window.history.back();
-      }}
-    >
+    <Link to={to} className="back-link">
       {IcBack} {label}
-    </a>
+    </Link>
   );
 }
