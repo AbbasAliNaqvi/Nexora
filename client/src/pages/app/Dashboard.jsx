@@ -12,65 +12,89 @@ import {
 } from "../../components/ui/PageShell";
 import "./Dashboard.css";
 
+function formatChartDate(value = "") {
+  const [, month = "", day = ""] = value.split("-");
+  return `${month}-${day}`;
+}
+
 function MiniChart({ data = [] }) {
-  if (data.length < 2) {
+  if (!data.length) {
     return <div className="chart-empty">No traffic data yet.</div>;
   }
-
-  const W = 600;
-  const H = 80;
-  const p = 6;
-  const max = Math.max(...data.map((d) => d.requests), 1);
-  const pts = data.map((d, i) => ({
-    x: p + (i / (data.length - 1)) * (W - p * 2),
-    y: H - p - (d.requests / max) * (H - p * 2),
+  const peak = data.reduce(
+    (best, item) => (item.requests > best.requests ? item : best),
+    data[0],
+  );
+  const total = data.reduce((sum, item) => sum + item.requests, 0);
+  const maxRequests = Math.max(...data.map((item) => item.requests), 1);
+  const W = 640;
+  const H = 168;
+  const PAD_X = 18;
+  const PAD_Y = 14;
+  const innerW = W - PAD_X * 2;
+  const innerH = H - PAD_Y * 2 - 18;
+  const stepX = data.length > 1 ? innerW / (data.length - 1) : innerW;
+  const linePoints = data.map((item, index) => ({
+    x: PAD_X + stepX * index,
+    y: PAD_Y + innerH - (item.requests / maxRequests) * innerH,
   }));
-  const line = pts.map((pt) => `${pt.x},${pt.y}`).join(" ");
-  const area =
-    `M${pts[0].x},${H - p} ` +
-    pts.map((pt) => `L${pt.x},${pt.y}`).join(" ") +
-    ` L${pts[pts.length - 1].x},${H - p} Z`;
-  const errPts = data.map((d, i) => ({
-    x: p + (i / (data.length - 1)) * (W - p * 2),
-    y:
-      H -
-      p -
-      (d.errors / Math.max(...data.map((x) => x.errors), 1)) * (H - p * 2),
-  }));
-  const errLine = errPts.map((pt) => `${pt.x},${pt.y}`).join(" ");
+  const line = linePoints.map((point) => `${point.x},${point.y}`).join(" ");
 
   return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      style={{ display: "block", height: 80 }}
-    >
-      <defs>
-        <linearGradient id="dashboard-area" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--brand)" stopOpacity=".2" />
-          <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#dashboard-area)" />
-      <polyline
-        points={line}
-        fill="none"
-        stroke="var(--brand-dark)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <polyline
-        points={errLine}
-        fill="none"
-        stroke="var(--red)"
-        strokeWidth="1"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        strokeDasharray="3 2"
-      />
-    </svg>
+    <div className="dash-mini-chart">
+      <div className="dash-mini-chart-kpis">
+        <div className="dash-mini-kpi">
+          <span>Total</span>
+          <strong>{total}</strong>
+        </div>
+        <div className="dash-mini-kpi">
+          <span>Peak</span>
+          <strong>{`${formatChartDate(peak.date)} · ${peak.requests}`}</strong>
+        </div>
+      </div>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
+        {[0, 0.5, 1].map((tick) => {
+          const y = PAD_Y + innerH - innerH * tick;
+          return (
+            <line
+              key={tick}
+              x1={PAD_X}
+              y1={y}
+              x2={W - PAD_X}
+              y2={y}
+              stroke="var(--border)"
+              strokeWidth="1"
+              opacity="0.65"
+            />
+          );
+        })}
+        <polyline
+          points={line}
+          fill="none"
+          stroke="var(--brand-dark)"
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {linePoints.map((point, index) => (
+          <g key={data[index].date}>
+            <circle cx={point.x} cy={point.y} r="2.5" fill="var(--brand-dark)" />
+            <text
+              x={point.x}
+              y={H - 2}
+              textAnchor="middle"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 8,
+                fill: "var(--text-4)",
+              }}
+            >
+              {formatChartDate(data[index].date)}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
   );
 }
 

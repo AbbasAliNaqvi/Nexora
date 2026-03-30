@@ -23,6 +23,48 @@ import "./APIBuilder.css";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 const FIELD_TYPES = ["text", "email", "password", "number", "boolean"];
+const CRUD_OPERATIONS = [
+  {
+    key: "list",
+    method: "GET",
+    scope: "collection",
+    label: "List",
+    path: "/resource",
+    description: "Fetch all records for this resource.",
+  },
+  {
+    key: "create",
+    method: "POST",
+    scope: "collection",
+    label: "Create",
+    path: "/resource",
+    description: "Create a new record from request body fields.",
+  },
+  {
+    key: "read",
+    method: "GET",
+    scope: "item",
+    label: "Get by id",
+    path: "/resource/:id",
+    description: "Fetch a single record by id.",
+  },
+  {
+    key: "update",
+    method: "PATCH",
+    scope: "item",
+    label: "Patch",
+    path: "/resource/:id",
+    description: "Update an existing record by id.",
+  },
+  {
+    key: "delete",
+    method: "DELETE",
+    scope: "item",
+    label: "Delete",
+    path: "/resource/:id",
+    description: "Delete a record by id.",
+  },
+];
 const STARTERS = [
   {
     name: "Login",
@@ -176,17 +218,22 @@ function normalizeCrudFields(fields = []) {
     .filter((field) => field.key);
 }
 
-function buildCrudPaths(collection) {
-  return [
-    { method: "GET", path: `/${collection}` },
-    { method: "POST", path: `/${collection}` },
-    { method: "GET", path: `/${collection}/:id` },
-    { method: "PATCH", path: `/${collection}/:id` },
-    { method: "DELETE", path: `/${collection}/:id` },
-  ];
+function buildCrudPaths(collection, selectedOperations = CRUD_OPERATIONS.map((item) => item.key)) {
+  return CRUD_OPERATIONS.filter((item) => selectedOperations.includes(item.key)).map((item) => ({
+    key: item.key,
+    method: item.method,
+    path:
+      item.scope === "collection" ? `/${collection}` : `/${collection}/:id`,
+  }));
 }
 
-function createCrudPayloads(resourceName, fields, summary = "", collectionName = "") {
+function createCrudPayloads(
+  resourceName,
+  fields,
+  summary = "",
+  collectionName = "",
+  selectedOperations = CRUD_OPERATIONS.map((item) => item.key),
+) {
   const collection = normalizeResourceName(collectionName || resourceName);
   const safeResourceName = resourceName?.trim() || collection;
   const normalizedFields = normalizeCrudFields(fields);
@@ -197,8 +244,8 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
     return acc;
   }, {});
 
-  return [
-    {
+  const allPayloads = {
+    list: {
       method: "GET",
       path: `/${collection}`,
       description: `List ${collection}. ${summary}`.trim(),
@@ -209,7 +256,7 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
       mockResponse: { success: true, data: [] },
       tags: ["crud", collection, "list"],
     },
-    {
+    create: {
       method: "POST",
       path: `/${collection}`,
       description: `Create a ${safeResourceName}. ${summary}`.trim(),
@@ -220,7 +267,7 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
       mockResponse: { success: true, data: exampleBody },
       tags: ["crud", collection, "create"],
     },
-    {
+    read: {
       method: "GET",
       path: `/${collection}/:id`,
       description: `Get a single ${safeResourceName} by id.`,
@@ -231,7 +278,7 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
       mockResponse: { success: true, data: { _id: "id", ...exampleBody } },
       tags: ["crud", collection, "read"],
     },
-    {
+    update: {
       method: "PATCH",
       path: `/${collection}/:id`,
       description: `Update a ${safeResourceName} by id.`,
@@ -242,7 +289,7 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
       mockResponse: { success: true, data: { _id: "id", ...exampleBody } },
       tags: ["crud", collection, "update"],
     },
-    {
+    delete: {
       method: "DELETE",
       path: `/${collection}/:id`,
       description: `Delete a ${safeResourceName} by id.`,
@@ -253,7 +300,9 @@ function createCrudPayloads(resourceName, fields, summary = "", collectionName =
       mockResponse: { success: true, data: { deleted: true } },
       tags: ["crud", collection, "delete"],
     },
-  ];
+  };
+
+  return selectedOperations.map((key) => allPayloads[key]).filter(Boolean);
 }
 
 const IcTrash = (
@@ -964,6 +1013,7 @@ function CrudModal({
   const [fields, setFields] = useState([
     { key: "name", type: "text", required: true },
   ]);
+  const [operations, setOperations] = useState(CRUD_OPERATIONS.map((item) => item.key));
 
   useEffect(() => {
     if (!open) return;
@@ -973,6 +1023,11 @@ function CrudModal({
       initialData?.fields?.length
         ? normalizeCrudFields(initialData.fields)
         : [{ key: "name", type: "text", required: true }],
+    );
+    setOperations(
+      initialData?.operations?.length
+        ? initialData.operations
+        : CRUD_OPERATIONS.map((item) => item.key),
     );
   }, [open, initialPrompt, initialData]);
 
@@ -1000,6 +1055,17 @@ function CrudModal({
       resourceName,
       summary,
       fields: normalizeCrudFields(fields),
+      operations,
+    });
+  };
+
+  const toggleOperation = (key) => {
+    setOperations((current) => {
+      if (current.includes(key)) {
+        if (current.length === 1) return current;
+        return current.filter((item) => item !== key);
+      }
+      return [...current, key];
     });
   };
 
@@ -1032,6 +1098,35 @@ function CrudModal({
                   onChange={(e) => setSummary(e.target.value)}
                 />
               </FormField>
+            </div>
+
+            <div className="builder-section">
+              <div className="builder-section-head">
+                <span className="builder-section-kicker">Operations</span>
+                <h3 className="builder-section-title">Choose which CRUD routes to deploy</h3>
+              </div>
+              <div className="builder-op-grid">
+                {CRUD_OPERATIONS.map((operation) => {
+                  const active = operations.includes(operation.key);
+                  return (
+                    <button
+                      key={operation.key}
+                      type="button"
+                      className={`builder-op-card ${active ? "builder-op-card-active" : ""}`}
+                      onClick={() => toggleOperation(operation.key)}
+                    >
+                      <div className="builder-op-card-top">
+                        <MethodBadge method={operation.method} />
+                        <span className="builder-op-title">{operation.label}</span>
+                      </div>
+                      <code className="builder-op-path">
+                        {operation.path.replace("resource", resourceName || "resource")}
+                      </code>
+                      <span className="builder-op-copy">{operation.description}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="builder-section">
@@ -1106,9 +1201,9 @@ function CrudModal({
             <div className="builder-preview-card">
               <span className="builder-section-kicker">Generated endpoints</span>
               <div className="builder-crud-list">
-                {["GET /resource", "POST /resource", "GET /resource/:id", "PATCH /resource/:id", "DELETE /resource/:id"].map((item) => (
-                  <div key={item} className="builder-preview-field">
-                    <span>{item.replace("resource", resourceName || "resource")}</span>
+                {buildCrudPaths(resourceName || "resource", operations).map((item) => (
+                  <div key={`${item.method}-${item.path}`} className="builder-preview-field">
+                    <span>{`${item.method} ${item.path}`}</span>
                   </div>
                 ))}
               </div>
@@ -1190,7 +1285,13 @@ export default function APIBuilder() {
     }
   };
 
-  const handleCreateCrud = async ({ resourceName, summary, fields, collectionName = "" }) => {
+  const handleCreateCrud = async ({
+    resourceName,
+    summary,
+    fields,
+    collectionName = "",
+    operations = CRUD_OPERATIONS.map((item) => item.key),
+  }) => {
     if (!project?.databaseUri) {
       toastErr("Add a database URI in project settings before creating CRUD APIs.");
       return;
@@ -1210,7 +1311,12 @@ export default function APIBuilder() {
       return;
     }
 
-    const nextRoutes = buildCrudPaths(collection);
+    if (!operations.length) {
+      toastErr("Choose at least one CRUD operation.");
+      return;
+    }
+
+    const nextRoutes = buildCrudPaths(collection, operations);
     const conflicts = nextRoutes.filter((route) =>
       endpoints.some(
         (endpoint) => endpoint.method === route.method && endpoint.path === route.path,
@@ -1233,6 +1339,7 @@ export default function APIBuilder() {
         normalizedFields,
         summary,
         collection,
+        operations,
       );
       const created = [];
 
@@ -1278,6 +1385,7 @@ export default function APIBuilder() {
         collectionName: plan.collectionName || plan.resourceName || "",
         summary: plan.summary || "",
         fields: normalizeCrudFields(plan.fields || []),
+        operations: CRUD_OPERATIONS.map((item) => item.key),
       };
 
       if (!nextDraft.resourceName || nextDraft.fields.length === 0) {
@@ -1346,6 +1454,13 @@ export default function APIBuilder() {
                 Define the resource name and fields. Nexora creates `GET`, `POST`,
                 `GET by id`, `PATCH`, and `DELETE` routes for your project.
               </p>
+              <div className="builder-option-route-row">
+                {CRUD_OPERATIONS.map((operation) => (
+                  <span key={operation.key} className="builder-option-route">
+                    {operation.method}
+                  </span>
+                ))}
+              </div>
               <button className="btn btn-primary" onClick={() => {
                 setAiDraft(null);
                 setCrudOpen(true);

@@ -44,6 +44,40 @@
   padding: 2.5rem 1rem;
 }
 
+.usage-traffic-chart {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.usage-traffic-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.usage-traffic-kpi {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-soft) 80%, transparent);
+}
+
+.usage-traffic-kpi span {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.usage-traffic-kpi strong {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  color: var(--text-1);
+}
+
 .chart-legend {
   display: flex;
   gap: 0.75rem;
@@ -58,7 +92,7 @@
 }
 .legend-item::before {
   content: "";
-  width: 20px;
+  width: 18px;
   height: 2px;
   border-radius: 1px;
   display: inline-block;
@@ -89,6 +123,7 @@
   font-size: 0.72rem;
   color: var(--text-2);
 }
+
 .donut-dot {
   width: 8px;
   height: 8px;
@@ -190,6 +225,10 @@
   }
   .usage-charts-row {
     flex-direction: column;
+  }
+
+  .usage-traffic-summary {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 600px) {

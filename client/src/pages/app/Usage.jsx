@@ -11,85 +11,151 @@ import {
 import "./Usage.css";
 
 function AreaChart({ data = [] }) {
-  if (data.length < 2)
+  if (!data.length)
     return (
       <div className="chart-empty">
         No traffic data yet. Hit the gateway to start.
       </div>
     );
-  const W = 600,
-    H = 100,
-    p = 6;
-  const maxR = Math.max(...data.map((d) => d.requests), 1);
-  const maxE = Math.max(...data.map((d) => d.errors), 1);
-  const rPts = data.map((d, i) => ({
-    x: p + (i / (data.length - 1)) * (W - p * 2),
-    y: H - p - (d.requests / maxR) * (H - p * 2),
+  const totalRequests = data.reduce((sum, item) => sum + item.requests, 0);
+  const totalErrors = data.reduce((sum, item) => sum + item.errors, 0);
+  const peak = data.reduce(
+    (best, item) => (item.requests > best.requests ? item : best),
+    data[0],
+  );
+  const W = 640;
+  const H = 210;
+  const PAD_X = 22;
+  const PAD_Y = 18;
+  const innerW = W - PAD_X * 2;
+  const innerH = H - PAD_Y * 2 - 28;
+  const maxValue = Math.max(...data.map((d) => Math.max(d.requests, d.errors)), 1);
+  const stepX = data.length > 1 ? innerW / (data.length - 1) : innerW;
+  const requestPoints = data.map((d, i) => ({
+    x: PAD_X + stepX * i,
+    y: PAD_Y + innerH - (d.requests / maxValue) * innerH,
   }));
-  const ePts = data.map((d, i) => ({
-    x: p + (i / (data.length - 1)) * (W - p * 2),
-    y: H - p - (d.errors / maxE) * (H - p * 2),
+  const errorPoints = data.map((d, i) => ({
+    x: PAD_X + stepX * i,
+    y: PAD_Y + innerH - (d.errors / maxValue) * innerH,
   }));
-  const area = (pts) =>
-    `M${pts[0].x},${H - p} ` +
-    pts.map((pt) => `L${pt.x},${pt.y}`).join(" ") +
-    ` L${pts[pts.length - 1].x},${H - p} Z`;
-  const line = (pts) => pts.map((pt) => `${pt.x},${pt.y}`).join(" ");
+  const area = (points) =>
+    `M ${points[0].x} ${PAD_Y + innerH} ` +
+    points.map((point) => `L ${point.x} ${point.y}`).join(" ") +
+    ` L ${points[points.length - 1].x} ${PAD_Y + innerH} Z`;
+  const line = (points) => points.map((point) => `${point.x},${point.y}`).join(" ");
   return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      style={{ display: "block", height: 100 }}
-    >
-      <defs>
-        <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--brand)" stopOpacity=".18" />
-          <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ef4444" stopOpacity=".12" />
-          <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area(rPts)} fill="url(#rg)" />
-      <polyline
-        points={line(rPts)}
-        fill="none"
-        stroke="var(--brand-dark)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <path d={area(ePts)} fill="url(#eg)" />
-      <polyline
-        points={line(ePts)}
-        fill="none"
-        stroke="#ef4444"
-        strokeWidth="1"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        strokeDasharray="3 2"
-      />
-      {data.map((d, i) => {
-        const x = p + (i / (data.length - 1)) * (W - p * 2);
-        return (
-          <text
-            key={i}
-            x={x}
-            y={H - 1}
-            textAnchor="middle"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 8,
-              fill: "var(--text-4)",
-            }}
-          >
-            {d.date?.slice(5)}
-          </text>
-        );
-      })}
-    </svg>
+    <div className="usage-traffic-chart">
+      <div className="usage-traffic-summary">
+        <div className="usage-traffic-kpi">
+          <span>Requests</span>
+          <strong>{totalRequests}</strong>
+        </div>
+        <div className="usage-traffic-kpi">
+          <span>Errors</span>
+          <strong>{totalErrors}</strong>
+        </div>
+        <div className="usage-traffic-kpi">
+          <span>Peak day</span>
+          <strong>{`${formatChartDate(peak.date)} · ${peak.requests}`}</strong>
+        </div>
+      </div>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
+        <defs>
+          <linearGradient id="usageLineGlow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--brand)" stopOpacity=".18" />
+            <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {[0, 0.33, 0.66, 1].map((tick) => {
+          const y = PAD_Y + innerH - innerH * tick;
+          return (
+            <g key={tick}>
+              <line
+                x1={PAD_X}
+                y1={y}
+                x2={W - PAD_X}
+                y2={y}
+                stroke="var(--border)"
+                strokeWidth="1"
+                opacity="0.7"
+              />
+              <text
+                x={6}
+                y={y + 4}
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 8,
+                  fill: "var(--text-4)",
+                }}
+              >
+                {Math.round(maxValue * tick)}
+              </text>
+            </g>
+          );
+        })}
+
+        <path d={area(requestPoints)} fill="url(#usageLineGlow)" />
+        <polyline
+          points={line(requestPoints)}
+          fill="none"
+          stroke="var(--brand-dark)"
+          strokeWidth="2.4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <polyline
+          points={line(errorPoints)}
+          fill="none"
+          stroke="#ef4444"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeDasharray="4 6"
+          opacity="0.9"
+        />
+
+        {requestPoints.map((point, index) => (
+          <circle
+            key={`${data[index].date}-point`}
+            cx={point.x}
+            cy={point.y}
+            r="2.75"
+            fill="var(--brand-dark)"
+          />
+        ))}
+
+        {errorPoints.map((point, index) => (
+          <circle
+            key={`${data[index].date}-error`}
+            cx={point.x}
+            cy={point.y}
+            r="2"
+            fill="#ef4444"
+          />
+        ))}
+
+        {data.map((item, index) => {
+          const x = PAD_X + stepX * index;
+          return (
+            <text
+              key={item.date}
+              x={x}
+              y={H - 4}
+              textAnchor="middle"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 8,
+                fill: "var(--text-4)",
+              }}
+              >
+              {formatChartDate(item.date)}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
@@ -201,6 +267,11 @@ function DonutChart({ data = [] }) {
       </div>
     </div>
   );
+}
+
+function formatChartDate(value = "") {
+  const [, month = "", day = ""] = value.split("-");
+  return `${month}-${day}`;
 }
 
 export default function Usage() {

@@ -6,6 +6,18 @@ const getUserProjectIds = async (userId) => {
   return projects.map((p) => p._id);
 };
 
+const startOfUtcDay = (date = new Date()) =>
+  new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+
+const formatUtcDate = (date) => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 exports.getOverview = async (req, res, next) => {
   try {
     const projectIds = await getUserProjectIds(req.user._id);
@@ -83,17 +95,22 @@ exports.getProjectUsage = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Project not found." });
 
-    const days = Math.min(parseInt(req.query.days) || 7, 30);
-    const since = new Date();
-    since.setDate(since.getDate() - (days - 1));
-    since.setHours(0, 0, 0, 0);
+    const days = Math.min(parseInt(req.query.days, 10) || 7, 30);
+    const since = startOfUtcDay();
+    since.setUTCDate(since.getUTCDate() - (days - 1));
 
     const [dailyStats, endpointBreakdown, statusBreakdown] = await Promise.all([
       UsageLog.aggregate([
         { $match: { project: project._id, timestamp: { $gte: since } } },
         {
           $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$timestamp",
+                timezone: "UTC",
+              },
+            },
             requests: { $sum: 1 },
             errors: { $sum: { $cond: [{ $gte: ["$statusCode", 400] }, 1, 0] } },
             avgLatency: { $avg: "$latencyMs" },
@@ -122,8 +139,8 @@ exports.getProjectUsage = async (req, res, next) => {
     const filledDays = [];
     for (let i = 0; i < days; i++) {
       const d = new Date(since);
-      d.setDate(d.getDate() + i);
-      const label = d.toISOString().split("T")[0];
+      d.setUTCDate(d.getUTCDate() + i);
+      const label = formatUtcDate(d);
       const found = dailyStats.find((s) => s._id === label);
       filledDays.push({
         date: label,
