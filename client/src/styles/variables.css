@@ -40,6 +40,7 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   --section-padding: clamp(5rem, 10vw, 10rem);
+  --section-padding1: clamp(5rem, 3vw, 10rem);
   --container-max: 1200px;
   --container-pad: clamp(1.25rem, 5vw, 3rem);
 }

@@ -80,10 +80,6 @@ export default function Landing() {
               Turn one project into a real API product with a proper workspace,
               a usable builder, and clean developer UX.
             </p>
-            <p className="hero-sub">
-              Black, minimal, and focused on shipping. The public site stays bold.
-              The product shell becomes light, precise, and easy to work in.
-            </p>
             <div className="hero-actions">
               <Link to="/register" className="btn btn-primary">
                 Start building
@@ -147,12 +143,6 @@ export default function Landing() {
         <div className="container">
           <div className="section-head">
             <span className="section-label">Product</span>
-            <h2 className="section-title">
-              The landing stays dramatic. The actual product becomes practical.
-            </h2>
-            <p className="section-sub">
-              Strong first impression outside, calm and readable workspace inside.
-            </p>
           </div>
 
           <div className="feature-grid">
@@ -171,7 +161,6 @@ export default function Landing() {
         <div className="container">
           <div className="section-head">
             <span className="section-label">Workflow</span>
-            <h2 className="section-title">A simpler path from idea to working gateway.</h2>
           </div>
 
           <div className="workflow-grid">
@@ -190,7 +179,6 @@ export default function Landing() {
         <div className="container">
           <div className="section-head">
             <span className="section-label">Pricing</span>
-            <h2 className="section-title">Start free, then scale when the API gets traction.</h2>
           </div>
 
           <div className="pricing-grid">

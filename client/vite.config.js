@@ -6,8 +6,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api':     { target: 'http://localhost:5050', changeOrigin: true },
-      '/gateway': { target: 'http://localhost:5050', changeOrigin: true },
+      '/api':     { target: 'https://nexora-production-5cac.up.railway.app', changeOrigin: true },
+      '/gateway': { target: 'https://nexora-production-5cac.up.railway.app', changeOrigin: true },
     },
   },
 })
