@@ -14,11 +14,16 @@
 
 .dash-hero-copy,
 .dash-hero-panel {
-  background: linear-gradient(180deg, rgba(255, 251, 244, 0.9), rgba(255, 251, 244, 0.72));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-card) 96%, transparent),
+    color-mix(in srgb, var(--bg-card) 84%, transparent)
+  );
   border: 1px solid var(--border);
   border-radius: 26px;
   padding: 1.6rem;
   box-shadow: 0 24px 60px rgba(28, 23, 18, 0.06);
+  min-width: 0;
 }
 
 .dash-hero-kicker {
@@ -38,6 +43,7 @@
   letter-spacing: -0.06em;
   color: var(--text-1);
   max-width: 12ch;
+  word-break: break-word;
 }
 
 .dash-hero-text {
@@ -56,8 +62,8 @@
 }
 
 .dash-hero-terminal {
-  background: #17130f;
-  color: #f3ede2;
+  background: color-mix(in srgb, var(--bg) 88%, var(--brand) 12%);
+  color: var(--off-white);
   border-radius: 22px;
   padding: 1.25rem;
   min-height: 100%;
@@ -79,8 +85,8 @@
   font-size: 0.78rem;
   padding: 0.85rem 0.95rem;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--bg-card) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-bright) 70%, transparent);
 }
 
 .stat-grid {
@@ -98,6 +104,7 @@
 
 .dash-card-large {
   min-height: 320px;
+  min-width: 0;
 }
 
 .card-title {
@@ -181,6 +188,7 @@
   transition:
     background 0.15s,
     border-color 0.15s;
+  min-width: 0;
 }
 
 .proj-row:hover,
@@ -242,5 +250,15 @@
   .dash-hero-copy,
   .dash-hero-panel {
     padding: 1.25rem;
+  }
+
+  .dash-hero-title {
+    max-width: none;
+    font-size: 2.4rem;
+  }
+
+  .dash-hero-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 }

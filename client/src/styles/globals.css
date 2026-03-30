@@ -6,6 +6,10 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
 }
+
+#root {
+  min-height: 100vh;
+}
 a {
   color: inherit;
   text-decoration: none;
@@ -200,5 +204,11 @@ pre {
 @media (min-width: 769px) {
   .hide-desktop {
     display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .btn {
+    min-height: 44px;
   }
 }

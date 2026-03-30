@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useAuthStore from "./store/authStore";
+import useThemeStore from "./store/themeStore";
 import AppLayout from "./components/layout/AppLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -60,13 +61,19 @@ function Loader() {
 
 export default function App() {
   const { fetchMe, token } = useAuthStore();
+  const initTheme = useThemeStore((state) => state.initTheme);
   useEffect(() => {
     if (token) fetchMe();
     else useAuthStore.setState({ loading: false });
   }, []);
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />

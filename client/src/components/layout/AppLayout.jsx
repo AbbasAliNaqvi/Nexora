@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import useAuthStore from "../../../src/store/authStore";
+import useThemeStore from "../../store/themeStore";
 import "./AppLayout.css";
 
 const I = {
@@ -65,6 +66,20 @@ const I = {
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
     </svg>
   ),
+  theme: (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3a6 6 0 000 18 9 9 0 010-18z" />
+    </svg>
+  ),
   logout: (
     <svg
       width="17"
@@ -112,6 +127,8 @@ const TIER_COLOR = {
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuthStore();
+  const theme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -138,6 +155,7 @@ export default function AppLayout() {
           <button
             className="sidebar-toggle"
             onClick={() => setCollapsed((v) => !v)}
+            type="button"
           >
             <span
               style={{
@@ -179,6 +197,15 @@ export default function AppLayout() {
         </nav>
 
         <div className="sidebar-bottom">
+          <button className="sidebar-link" onClick={toggleTheme} type="button">
+            <span className="sidebar-link-icon">{I.theme}</span>
+            {!collapsed && (
+              <span className="sidebar-link-label">
+                {theme === "dark" ? "Switch to light" : "Switch to dark"}
+              </span>
+            )}
+          </button>
+
           {!collapsed && user && (
             <div className="sidebar-user">
               <div className="sidebar-avatar">
@@ -202,6 +229,7 @@ export default function AppLayout() {
               navigate("/");
             }}
             title={collapsed ? "Log out" : undefined}
+            type="button"
           >
             <span className="sidebar-link-icon">{I.logout}</span>
             {!collapsed && <span className="sidebar-link-label">Log out</span>}
@@ -222,12 +250,16 @@ export default function AppLayout() {
                 key={to}
                 onClick={() => navigate(to)}
                 className={`mobile-nav-tab ${active ? "mobile-nav-tab-active" : ""}`}
+                type="button"
               >
                 <span className="mobile-nav-icon">{I[icon]}</span>
                 <span className="mobile-nav-label">{label}</span>
               </button>
             );
           })}
+          <button className="mobile-nav-tab" onClick={toggleTheme} type="button">
+            <span className="mobile-nav-icon">{I.theme}</span>
+          </button>
         </div>
       </nav>
     </div>

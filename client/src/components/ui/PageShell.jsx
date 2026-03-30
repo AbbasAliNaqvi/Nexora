@@ -17,11 +17,12 @@ export function PageHeader({ title, subtitle, action }) {
   );
 }
 
-export function Card({ children, className = "", onClick }) {
+export function Card({ children, className = "", onClick, style }) {
   return (
     <div
       className={`card ${onClick ? "card-hover" : ""} ${className}`}
       onClick={onClick}
+      style={style}
     >
       {children}
     </div>
@@ -86,11 +87,15 @@ export function Spinner({ size = 20, dark = false }) {
   );
 }
 
-export function Modal({ open, onClose, title, children }) {
+export function Modal({ open, onClose, title, children, className = "", maxWidth }) {
   if (!open) return null;
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`modal-box ${className}`}
+        onClick={(e) => e.stopPropagation()}
+        style={maxWidth ? { maxWidth } : undefined}
+      >
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           <button className="modal-close" onClick={onClose}>
