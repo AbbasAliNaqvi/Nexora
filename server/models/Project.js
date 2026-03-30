@@ -29,6 +29,10 @@ const projectSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    databaseUri: {
+      type: String,
+      default: null,
+    },
     rateLimitOverride: {
       type: Number,
       default: null,

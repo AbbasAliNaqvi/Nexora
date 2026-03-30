@@ -30,12 +30,13 @@ exports.createProject = async (req, res, next) => {
         message: `Your ${req.user.subscription} plan allows up to ${limit} projects. Upgrade to create more.`,
       });
 
-    const { name, description, baseUrl, tags } = req.body;
+    const { name, description, baseUrl, databaseUri, tags } = req.body;
     const project = await Project.create({
       owner: req.user._id,
       name,
       description,
       baseUrl,
+      databaseUri,
       tags,
     });
     res.status(201).json({ success: true, project });
@@ -70,11 +71,27 @@ exports.getProject = async (req, res, next) => {
 
 exports.updateProject = async (req, res, next) => {
   try {
-    const { name, description, baseUrl, tags, rateLimitOverride, isActive } =
+    const {
+      name,
+      description,
+      baseUrl,
+      databaseUri,
+      tags,
+      rateLimitOverride,
+      isActive,
+    } =
       req.body;
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, owner: req.user._id },
-      { name, description, baseUrl, tags, rateLimitOverride, isActive },
+      {
+        name,
+        description,
+        baseUrl,
+        databaseUri,
+        tags,
+        rateLimitOverride,
+        isActive,
+      },
       { new: true, runValidators: true },
     );
     if (!project)

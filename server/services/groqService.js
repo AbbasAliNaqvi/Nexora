@@ -97,3 +97,31 @@ ${projectContext ? `\nCurrent project context:\n${JSON.stringify(projectContext,
 
   return res.choices[0].message.content;
 };
+
+exports.generateCrudPlan = async (prompt) => {
+  const res = await groq.chat.completions.create({
+    model: GROQ_MODEL,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You design CRUD APIs. Return ONLY valid JSON with a resource name, collection name, and fields. No markdown.",
+      },
+      {
+        role: "user",
+        content: `Generate a CRUD API plan from this request:\n\n${prompt}\n\nReturn only this JSON shape:\n{\n  "resourceName": "users",\n  "collectionName": "users",\n  "fields": [\n    { "key": "name", "type": "text", "required": true },\n    { "key": "email", "type": "email", "required": true }\n  ],\n  "summary": "short description"\n}`,
+      },
+    ],
+    max_tokens: 700,
+    temperature: 0.2,
+  });
+
+  const raw = res.choices[0].message.content.trim();
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error("AI returned malformed CRUD plan JSON.");
+  }
+};

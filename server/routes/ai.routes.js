@@ -7,5 +7,6 @@ router.use(protect);
 router.post("/generate-docs/:projectId", ctrl.generateDocs);
 router.post("/analyze-health/:projectId", ctrl.analyzeHealth);
 router.post("/chat", ctrl.chat);
+router.post("/crud-plan", ctrl.generateCrudPlan);
 
 module.exports = router;

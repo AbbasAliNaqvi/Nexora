@@ -156,6 +156,13 @@
   margin-bottom: 1rem;
 }
 
+.builder-workbench-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .builder-studio-title {
   margin-top: 0.35rem;
   font-family: var(--font-display);
@@ -175,6 +182,28 @@
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.builder-top-simple {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.builder-option-card {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+  min-height: 220px;
+}
+
+.builder-option-card-primary {
+  border-color: var(--brand-border);
+  box-shadow: 0 24px 60px rgba(28, 23, 18, 0.08);
+}
+
+.builder-option-copy {
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 56ch;
 }
 
 .builder-stats {
@@ -244,11 +273,27 @@
 }
 
 .builder-code-field {
+  display: block;
+  width: 100%;
+  min-width: 100%;
   min-height: 140px;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   background: var(--bg-input);
   color: var(--text-1);
+}
+
+.builder-ai-tip,
+.builder-crud-note {
+  color: var(--text-3);
+  line-height: 1.65;
+  font-size: 0.84rem;
+}
+
+.builder-crud-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
 }
 
 .builder-field-list {
@@ -272,6 +317,10 @@
   grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.6rem;
   align-items: center;
+}
+
+.crud-field-grid {
+  grid-template-columns: minmax(0, 1fr) 120px;
 }
 
 .builder-field-actions {
@@ -487,6 +536,15 @@
   gap: 0.35rem;
 }
 
+.ep-test-status {
+  margin-bottom: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--brand);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .ep-test-field-label {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -543,6 +601,7 @@
   }
 
   .builder-top,
+  .builder-top-simple,
   .builder-stats,
   .ep-detail-grid,
   .ep-detail-columns,
@@ -564,6 +623,10 @@
   .builder-workbench {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .builder-workbench-actions {
+    width: 100%;
   }
 
   .builder-workbench .btn {
@@ -596,5 +659,9 @@
   .builder-field-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .builder-option-card {
+    min-height: 0;
   }
 }

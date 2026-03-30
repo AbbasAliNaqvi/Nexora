@@ -35,6 +35,7 @@ export default function ProjectWorkspace() {
     name: "",
     description: "",
     baseUrl: "",
+    databaseUri: "",
     tags: "",
   });
   const [saving, setSaving] = useState(false);
@@ -59,6 +60,7 @@ export default function ProjectWorkspace() {
           name: nextProject.name || "",
           description: nextProject.description || "",
           baseUrl: nextProject.baseUrl || "",
+          databaseUri: nextProject.databaseUri || "",
           tags: (nextProject.tags || []).join(", "),
         });
       })
@@ -77,6 +79,7 @@ export default function ProjectWorkspace() {
         name: form.name,
         description: form.description,
         baseUrl: form.baseUrl || null,
+        databaseUri: form.databaseUri || null,
         tags: form.tags
           ? form.tags
               .split(",")
@@ -101,6 +104,7 @@ export default function ProjectWorkspace() {
         name: project.name,
         description: project.description,
         baseUrl: project.baseUrl,
+        databaseUri: project.databaseUri,
         tags: project.tags || [],
         isActive: !project.isActive,
       });
@@ -246,6 +250,13 @@ export default function ProjectWorkspace() {
                     placeholder="https://api.example.com"
                     value={form.baseUrl}
                     onChange={(e) => setField("baseUrl", e.target.value)}
+                  />
+                </FormField>
+                <FormField label="Database URI">
+                  <Input
+                    placeholder="mongodb+srv://..."
+                    value={form.databaseUri}
+                    onChange={(e) => setField("databaseUri", e.target.value)}
                   />
                 </FormField>
                 <FormField label="Tags">

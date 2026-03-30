@@ -62,7 +62,10 @@
 }
 
 .dash-hero-terminal {
-  background: color-mix(in srgb, var(--bg) 88%, var(--brand) 12%);
+  /* background: color-mix(in srgb, var(--bg) 88%, var(--brand) 12%); */
+  /* background: var(--brand); */
+    /* border: 5px solid rgba(236, 203, 168, 0.18); */
+  border: 5px solid var(--brand-dark);
   color: var(--off-white);
   border-radius: 22px;
   padding: 1.25rem;

@@ -142,6 +142,120 @@ const BLANK = {
   ],
 };
 
+function normalizeResourceName(value = "") {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-_]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-/]+|[-/]+$/g, "");
+}
+
+function normalizeFieldKey(value = "") {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s_]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function normalizeFieldType(value = "") {
+  return FIELD_TYPES.includes(value) ? value : "text";
+}
+
+function normalizeCrudFields(fields = []) {
+  return fields
+    .map((field) => ({
+      key: normalizeFieldKey(field.key || field.name || ""),
+      type: normalizeFieldType(field.type),
+      required: Boolean(field.required),
+    }))
+    .filter((field) => field.key);
+}
+
+function buildCrudPaths(collection) {
+  return [
+    { method: "GET", path: `/${collection}` },
+    { method: "POST", path: `/${collection}` },
+    { method: "GET", path: `/${collection}/:id` },
+    { method: "PATCH", path: `/${collection}/:id` },
+    { method: "DELETE", path: `/${collection}/:id` },
+  ];
+}
+
+function createCrudPayloads(resourceName, fields, summary = "", collectionName = "") {
+  const collection = normalizeResourceName(collectionName || resourceName);
+  const safeResourceName = resourceName?.trim() || collection;
+  const normalizedFields = normalizeCrudFields(fields);
+  const exampleBody = normalizedFields.reduce((acc, field) => {
+    if (field.type === "number") acc[field.key] = 0;
+    else if (field.type === "boolean") acc[field.key] = false;
+    else acc[field.key] = "";
+    return acc;
+  }, {});
+
+  return [
+    {
+      method: "GET",
+      path: `/${collection}`,
+      description: `List ${collection}. ${summary}`.trim(),
+      mode: "crud",
+      resource: { collection, fields: normalizedFields },
+      requestSchema: { body: {}, fields: [] },
+      mockStatusCode: 200,
+      mockResponse: { success: true, data: [] },
+      tags: ["crud", collection, "list"],
+    },
+    {
+      method: "POST",
+      path: `/${collection}`,
+      description: `Create a ${safeResourceName}. ${summary}`.trim(),
+      mode: "crud",
+      resource: { collection, fields: normalizedFields },
+      requestSchema: { body: exampleBody, fields: normalizedFields },
+      mockStatusCode: 201,
+      mockResponse: { success: true, data: exampleBody },
+      tags: ["crud", collection, "create"],
+    },
+    {
+      method: "GET",
+      path: `/${collection}/:id`,
+      description: `Get a single ${safeResourceName} by id.`,
+      mode: "crud",
+      resource: { collection, fields: normalizedFields },
+      requestSchema: { body: {}, fields: [] },
+      mockStatusCode: 200,
+      mockResponse: { success: true, data: { _id: "id", ...exampleBody } },
+      tags: ["crud", collection, "read"],
+    },
+    {
+      method: "PATCH",
+      path: `/${collection}/:id`,
+      description: `Update a ${safeResourceName} by id.`,
+      mode: "crud",
+      resource: { collection, fields: normalizedFields },
+      requestSchema: { body: exampleBody, fields: normalizedFields },
+      mockStatusCode: 200,
+      mockResponse: { success: true, data: { _id: "id", ...exampleBody } },
+      tags: ["crud", collection, "update"],
+    },
+    {
+      method: "DELETE",
+      path: `/${collection}/:id`,
+      description: `Delete a ${safeResourceName} by id.`,
+      mode: "crud",
+      resource: { collection, fields: normalizedFields },
+      requestSchema: { body: {}, fields: [] },
+      mockStatusCode: 200,
+      mockResponse: { success: true, data: { deleted: true } },
+      tags: ["crud", collection, "delete"],
+    },
+  ];
+}
+
 const IcTrash = (
   <svg
     width="14"
@@ -637,12 +751,21 @@ function CopyBtn({ text, title = "Copy" }) {
 }
 
 function buildCurl(project, endpoint) {
-  return [
+  const lines = [
     `curl -X ${endpoint.method} \\`,
     `  "${window.location.origin}/gateway/${project.slug}${endpoint.path}" \\`,
     '  -H "Content-Type: application/json" \\',
     '  -H "X-Api-Key: nxr_live_your_key"',
-  ].join("\n");
+  ];
+  const requestBody = getRequestExample(endpoint);
+  if (
+    ["POST", "PUT", "PATCH"].includes(endpoint.method) &&
+    requestBody &&
+    Object.keys(requestBody).length > 0
+  ) {
+    lines.push(`  -d '${JSON.stringify(requestBody, null, 2)}'`);
+  }
+  return lines.join("\n");
 }
 
 function getRequestExample(endpoint) {
@@ -661,18 +784,26 @@ function getRequestFields(endpoint) {
   }));
 }
 
-function EndpointTester({ endpoint }) {
+function EndpointTester({ endpoint, project }) {
   const [fields, setFields] = useState(getRequestFields(endpoint));
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [running, setRunning] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     setFields(getRequestFields(endpoint));
     setResult("");
     setError("");
     setRunning(false);
+    setStatus("");
   }, [endpoint]);
+
+  useEffect(() => {
+    if (!project?._id) return;
+    setApiKey(localStorage.getItem(`nxr_project_key_${project._id}`) || "");
+  }, [project?._id]);
 
   const updateField = (index, value) => {
     setFields((current) =>
@@ -682,9 +813,10 @@ function EndpointTester({ endpoint }) {
     );
   };
 
-  const runTest = () => {
+  const runTest = async () => {
     setRunning(true);
     setError("");
+    setStatus("");
     try {
       const missing = fields.find(
         (field) => field.required && !(field.value ?? field.defaultValue ?? ""),
@@ -692,12 +824,49 @@ function EndpointTester({ endpoint }) {
       if (missing) {
         throw new Error(`"${missing.key}" is required.`);
       }
-      setTimeout(() => {
-        setResult(JSON.stringify(endpoint.mockResponse, null, 2));
-        setRunning(false);
-      }, 350);
+
+      if (!apiKey.trim()) {
+        throw new Error("Add a raw API key to run a real gateway test.");
+      }
+
+      const body = fields.reduce((acc, field) => {
+        const rawValue = field.value ?? field.defaultValue ?? "";
+        if (rawValue === "") return acc;
+        if (field.type === "number") acc[field.key] = Number(rawValue);
+        else if (field.type === "boolean") acc[field.key] = rawValue === true || rawValue === "true";
+        else acc[field.key] = rawValue;
+        return acc;
+      }, {});
+
+      const response = await fetch(
+        `${window.location.origin}/gateway/${project.slug}${endpoint.path}`,
+        {
+          method: endpoint.method,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Api-Key": apiKey.trim(),
+          },
+          body:
+            ["POST", "PUT", "PATCH"].includes(endpoint.method)
+              ? JSON.stringify(body)
+              : undefined,
+        },
+      );
+
+      const text = await response.text();
+      let parsed;
+      try {
+        parsed = text ? JSON.parse(text) : {};
+      } catch {
+        parsed = { raw: text };
+      }
+
+      setStatus(`${response.status} ${response.ok ? "Success" : "Error"}`);
+      setResult(JSON.stringify(parsed, null, 2));
+      localStorage.setItem(`nxr_project_key_${project._id}`, apiKey.trim());
     } catch (err) {
       setError(err.message || "Unable to run the test.");
+    } finally {
       setRunning(false);
     }
   };
@@ -707,6 +876,16 @@ function EndpointTester({ endpoint }) {
       <div className="ep-detail-block">
         <div className="ep-detail-label">Test request</div>
         <div className="ep-test-form">
+          <label className="ep-test-field">
+            <span className="ep-test-field-label">API key *</span>
+            <input
+              className="form-input"
+              type="password"
+              placeholder="nxr_live_..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+          </label>
           {fields.length > 0 ? (
             fields.map((field, index) => (
               <label key={`${field.key}-${index}`} className="ep-test-field">
@@ -757,12 +936,194 @@ function EndpointTester({ endpoint }) {
         {error ? (
           <div className="builder-json-error">{error}</div>
         ) : (
-          <pre className="ep-detail-json ep-test-output">
-            {result || "Run a test to preview the mocked response for this endpoint."}
-          </pre>
+          <>
+            {status ? <div className="ep-test-status">{status}</div> : null}
+            <pre className="ep-detail-json ep-test-output">
+              {result || "Run a test to send a real gateway request for this endpoint."}
+            </pre>
+          </>
         )}
       </div>
     </div>
+  );
+}
+
+function CrudModal({
+  open,
+  onClose,
+  onCreate,
+  saving,
+  title = "Create CRUD API",
+  submitLabel = "Create CRUD API",
+  initialPrompt = "",
+  initialData = null,
+  mode = "manual",
+}) {
+  const [resourceName, setResourceName] = useState("");
+  const [summary, setSummary] = useState(initialPrompt);
+  const [fields, setFields] = useState([
+    { key: "name", type: "text", required: true },
+  ]);
+
+  useEffect(() => {
+    if (!open) return;
+    setResourceName(initialData?.resourceName || "");
+    setSummary(initialData?.summary || initialPrompt);
+    setFields(
+      initialData?.fields?.length
+        ? normalizeCrudFields(initialData.fields)
+        : [{ key: "name", type: "text", required: true }],
+    );
+  }, [open, initialPrompt, initialData]);
+
+  const updateField = (index, key, value) => {
+    setFields((current) =>
+      current.map((field, fieldIndex) =>
+        fieldIndex === index ? { ...field, [key]: value } : field,
+      ),
+    );
+  };
+
+  const addField = () => {
+    setFields((current) => [...current, { key: "", type: "text", required: false }]);
+  };
+
+  const removeField = (index) => {
+    setFields((current) =>
+      current.length === 1 ? current : current.filter((_, fieldIndex) => fieldIndex !== index),
+    );
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    onCreate({
+      resourceName,
+      summary,
+      fields: normalizeCrudFields(fields),
+    });
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title={title} className="builder-modal" maxWidth={920}>
+      <form onSubmit={submit}>
+        <div className="builder-composer">
+          <div className="builder-composer-main">
+            <div className="builder-section">
+              <div className="builder-section-head">
+                <span className="builder-section-kicker">Resource</span>
+                <h3 className="builder-section-title">
+                  {mode === "ai"
+                    ? "Review the AI-generated CRUD API"
+                    : "Create a deployed CRUD API"}
+                </h3>
+              </div>
+              <FormField label="Resource name">
+                <Input
+                  placeholder="users"
+                  value={resourceName}
+                  onChange={(e) => setResourceName(e.target.value)}
+                  required
+                />
+              </FormField>
+              <FormField label="Summary">
+                <Input
+                  placeholder="Store and manage user records"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                />
+              </FormField>
+            </div>
+
+            <div className="builder-section">
+              <div className="builder-section-head">
+                <span className="builder-section-kicker">Fields</span>
+                <h3 className="builder-section-title">Define the resource fields</h3>
+              </div>
+              <div className="builder-field-list">
+                {fields.map((field, index) => (
+                  <div key={`${field.key}-${index}`} className="builder-field-card">
+                    <div className="builder-field-grid crud-field-grid">
+                      <Input
+                        placeholder="field name"
+                        value={field.key}
+                        onChange={(e) => updateField(index, "key", e.target.value)}
+                      />
+                      <Select
+                        value={field.type}
+                        onChange={(e) => updateField(index, "type", e.target.value)}
+                      >
+                        {FIELD_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div className="builder-field-actions">
+                      <label className="builder-field-check">
+                        <input
+                          type="checkbox"
+                          checked={field.required}
+                          onChange={(e) =>
+                            updateField(index, "required", e.target.checked)
+                          }
+                        />
+                        Required
+                      </label>
+                      <button
+                        type="button"
+                        className="builder-field-remove"
+                        onClick={() => removeField(index)}
+                      >
+                        Remove field
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="btn btn-ghost builder-add-field" onClick={addField}>
+                Add field
+              </button>
+            </div>
+
+            <div className="form-actions builder-composer-actions">
+              <button type="button" className="btn btn-ghost" onClick={onClose}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Spinner size={14} dark /> Creating...
+                  </>
+                ) : (
+                  submitLabel
+                )}
+              </button>
+            </div>
+          </div>
+
+          <aside className="builder-composer-side">
+            <div className="builder-preview-card">
+              <span className="builder-section-kicker">Generated endpoints</span>
+              <div className="builder-crud-list">
+                {["GET /resource", "POST /resource", "GET /resource/:id", "PATCH /resource/:id", "DELETE /resource/:id"].map((item) => (
+                  <div key={item} className="builder-preview-field">
+                    <span>{item.replace("resource", resourceName || "resource")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="builder-preview-card">
+              <span className="builder-section-kicker">What happens</span>
+              <div className="builder-crud-note">
+                Nexora will deploy collection routes for this resource and connect them to your
+                project database URI.
+              </div>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
@@ -774,8 +1135,13 @@ export default function APIBuilder() {
   const [modalOpen, setModal] = useState(false);
   const [editTarget, setEdit] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [crudSaving, setCrudSaving] = useState(false);
   const [expanded, setExpanded] = useState(null);
   const [query, setQuery] = useState("");
+  const [crudOpen, setCrudOpen] = useState(false);
+  const [aiCrudOpen, setAiCrudOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiDraft, setAiDraft] = useState(null);
   const { toasts, success, error: toastErr } = useToast();
 
   useEffect(() => {
@@ -824,6 +1190,112 @@ export default function APIBuilder() {
     }
   };
 
+  const handleCreateCrud = async ({ resourceName, summary, fields, collectionName = "" }) => {
+    if (!project?.databaseUri) {
+      toastErr("Add a database URI in project settings before creating CRUD APIs.");
+      return;
+    }
+
+    const safeResourceName = (resourceName || "").trim();
+    const normalizedFields = normalizeCrudFields(fields);
+    const collection = normalizeResourceName(collectionName || safeResourceName);
+
+    if (!safeResourceName || !collection) {
+      toastErr("Add a valid resource name before creating CRUD APIs.");
+      return;
+    }
+
+    if (normalizedFields.length === 0) {
+      toastErr("Add at least one valid field before creating CRUD APIs.");
+      return;
+    }
+
+    const nextRoutes = buildCrudPaths(collection);
+    const conflicts = nextRoutes.filter((route) =>
+      endpoints.some(
+        (endpoint) => endpoint.method === route.method && endpoint.path === route.path,
+      ),
+    );
+
+    if (conflicts.length > 0) {
+      toastErr(
+        `These routes already exist: ${conflicts
+          .map((route) => `${route.method} ${route.path}`)
+          .join(", ")}`,
+      );
+      return;
+    }
+
+    setCrudSaving(true);
+    try {
+      const payloads = createCrudPayloads(
+        safeResourceName,
+        normalizedFields,
+        summary,
+        collection,
+      );
+      const created = [];
+
+      for (const payload of payloads) {
+        const { data } = await api.post(`/projects/${id}/endpoints`, payload);
+        created.push(data.endpoint);
+      }
+
+      setEps((current) => [...created, ...current]);
+      setCrudOpen(false);
+      setAiCrudOpen(false);
+      setAiDraft(null);
+      setAiPrompt("");
+      success(`CRUD API for "${safeResourceName}" created.`);
+    } catch (err) {
+      let route = null;
+      if (err.config?.data) {
+        try {
+          route = JSON.parse(err.config.data);
+        } catch {
+          route = null;
+        }
+      }
+      const label = route?.method && route?.path ? `${route.method} ${route.path}` : "route";
+      toastErr(err.response?.data?.message || `Failed to create ${label}.`);
+    } finally {
+      setCrudSaving(false);
+    }
+  };
+
+  const handleCreateCrudWithAi = async () => {
+    if (!aiPrompt.trim()) {
+      toastErr("Describe the API you want to create.");
+      return;
+    }
+
+    setCrudSaving(true);
+    try {
+      const { data } = await api.post("/ai/crud-plan", { prompt: aiPrompt.trim() });
+      const plan = data.plan || {};
+      const nextDraft = {
+        resourceName: plan.resourceName || plan.collectionName || "",
+        collectionName: plan.collectionName || plan.resourceName || "",
+        summary: plan.summary || "",
+        fields: normalizeCrudFields(plan.fields || []),
+      };
+
+      if (!nextDraft.resourceName || nextDraft.fields.length === 0) {
+        toastErr("AI returned an incomplete CRUD plan. Try a clearer prompt.");
+        return;
+      }
+
+      setAiDraft(nextDraft);
+      setAiCrudOpen(false);
+      setCrudOpen(true);
+      success("AI generated a CRUD draft. Review it and create the API.");
+    } catch (err) {
+      toastErr(err.response?.data?.message || "AI could not generate the CRUD plan.");
+    } finally {
+      setCrudSaving(false);
+    }
+  };
+
   const handleDelete = async (endpointId, e) => {
     e.stopPropagation();
     if (!confirm("Delete this endpoint?")) return;
@@ -857,12 +1329,7 @@ export default function APIBuilder() {
       <BackLink to={`/projects/${id}`} label={project?.name || "Project"} />
       <PageHeader
         title="API Builder"
-        subtitle="Create endpoints fast, then test the mocked response before shipping."
-        action={
-          <button className="btn btn-primary" onClick={() => setModal(true)}>
-            Add endpoint
-          </button>
-        }
+        subtitle="Create database-backed CRUD APIs or generate them from plain language."
       />
 
       {loading ? (
@@ -871,50 +1338,54 @@ export default function APIBuilder() {
         </div>
       ) : (
         <>
-          <div className="builder-workbench">
-            <div>
-              <span className="builder-panel-label">Endpoint studio</span>
-              <h2 className="builder-studio-title">
-                Build routes with a cleaner API workflow.
-              </h2>
-            </div>
-            <button className="btn btn-primary" onClick={() => setModal(true)}>
-              New endpoint
-            </button>
+          <div className="builder-top builder-top-simple">
+            <Card className="builder-option-card builder-option-card-primary">
+              <span className="builder-panel-label">CRUD API</span>
+              <h2 className="builder-studio-title">Create a resource and deploy full CRUD routes.</h2>
+              <p className="builder-option-copy">
+                Define the resource name and fields. Nexora creates `GET`, `POST`,
+                `GET by id`, `PATCH`, and `DELETE` routes for your project.
+              </p>
+              <button className="btn btn-primary" onClick={() => {
+                setAiDraft(null);
+                setCrudOpen(true);
+              }}>
+                Create CRUD API
+              </button>
+            </Card>
+
+            <Card className="builder-option-card">
+              <span className="builder-panel-label">Create with AI</span>
+              <h2 className="builder-studio-title">Describe the resource in plain language.</h2>
+              <p className="builder-option-copy">
+                Type what you want, let AI generate the fields, then review the CRUD draft before deployment.
+              </p>
+              <button className="btn btn-ghost" onClick={() => setAiCrudOpen(true)}>
+                Create with AI
+              </button>
+            </Card>
           </div>
 
-          <div className="builder-top">
-            <div className="builder-stats">
-              <StatCard
-                label="Registered"
-                value={endpoints.length}
-                sub="Total endpoints in this project"
-              />
-              <StatCard
-                label="Live"
-                value={endpoints.filter((endpoint) => endpoint.isActive).length}
-                sub="Enabled routes"
-              />
-              <StatCard
-                label="Ready to test"
-                value={endpoints.length}
-                sub="Each route includes a mock test panel"
-              />
-            </div>
-
-            <Card className="builder-panel">
-              <div className="builder-panel-head">
-                <div>
-                  <span className="builder-panel-label">How it works</span>
-                  <h3 className="builder-panel-title">Keep endpoint creation simple</h3>
-                </div>
-              </div>
-              <div className="builder-guide">
-                <div className="builder-guide-item">1. Choose method and path.</div>
-                <div className="builder-guide-item">2. Add an example request body.</div>
-                <div className="builder-guide-item">3. Define the mocked response and test it instantly.</div>
-              </div>
-            </Card>
+          <div className="builder-stats">
+            <StatCard
+              label="Registered"
+              value={endpoints.length}
+              sub="Total endpoints in this project"
+            />
+            <StatCard
+              label="Live"
+              value={endpoints.filter((endpoint) => endpoint.isActive).length}
+              sub="Enabled routes"
+            />
+            <StatCard
+              label="Database"
+              value={project?.databaseUri ? "Connected" : "Missing"}
+              sub={
+                project?.databaseUri
+                  ? "CRUD APIs can use your MongoDB URI"
+                  : "Add a database URI in project settings"
+              }
+            />
           </div>
 
           <Card className="builder-toolbar">
@@ -934,12 +1405,15 @@ export default function APIBuilder() {
               title={endpoints.length === 0 ? "No endpoints yet" : "No endpoints match"}
               desc={
                 endpoints.length === 0
-                  ? "Create your first endpoint and start testing the mocked response."
-                  : "Try a different search term or create a new endpoint."
+                  ? "Create your first CRUD API or generate one from AI."
+                  : "Try a different search term or create a new CRUD API."
               }
               action={
-                <button className="btn btn-primary" onClick={() => setModal(true)}>
-                  Add endpoint
+                <button className="btn btn-primary" onClick={() => {
+                  setAiDraft(null);
+                  setCrudOpen(true);
+                }}>
+                  Create CRUD API
                 </button>
               }
             />
@@ -1047,7 +1521,7 @@ export default function APIBuilder() {
                         </div>
                       </div>
 
-                      <EndpointTester endpoint={endpoint} />
+                      <EndpointTester endpoint={endpoint} project={project} />
 
                       <div className="ep-detail-block">
                         <div className="ep-curl-head">
@@ -1080,6 +1554,58 @@ export default function APIBuilder() {
         onSave={handleSave}
         saving={saving}
       />
+      <CrudModal
+        open={crudOpen}
+        onClose={() => setCrudOpen(false)}
+        onCreate={handleCreateCrud}
+        saving={crudSaving}
+        initialData={aiDraft}
+        mode={aiDraft ? "ai" : "manual"}
+      />
+      <Modal
+        open={aiCrudOpen}
+        onClose={() => setAiCrudOpen(false)}
+        title="Create CRUD API with AI"
+        className="builder-modal"
+        maxWidth={820}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateCrudWithAi();
+          }}
+        >
+          <div className="builder-section">
+            <div className="builder-section-head">
+              <span className="builder-section-kicker">Prompt</span>
+              <h3 className="builder-section-title">Describe what you need</h3>
+            </div>
+            <Textarea
+              className="builder-code-field"
+              placeholder="Example: I need a users API with name, email, age and role. Create full CRUD routes."
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+            />
+            <div className="builder-ai-tip">
+              Example: "Create a users API with name, email, age and role. I need full CRUD."
+            </div>
+          </div>
+          <div className="form-actions builder-composer-actions">
+            <button type="button" className="btn btn-ghost" onClick={() => setAiCrudOpen(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={crudSaving || !aiPrompt.trim()}>
+              {crudSaving ? (
+                <>
+                  <Spinner size={14} dark /> Generating...
+                </>
+              ) : (
+                "Generate CRUD API"
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </PageShell>
   );
 }

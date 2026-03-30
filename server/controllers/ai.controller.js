@@ -121,3 +121,19 @@ exports.chat = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.generateCrudPlan = async (req, res, next) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt || !prompt.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "prompt is required." });
+    }
+
+    const plan = await groqService.generateCrudPlan(prompt.trim());
+    res.json({ success: true, plan });
+  } catch (err) {
+    next(err);
+  }
+};

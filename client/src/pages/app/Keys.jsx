@@ -265,6 +265,7 @@ export default function Keys() {
   const handleCreate = (data) => {
     setKeys((k) => [data.key, ...k]);
     setReveal(data.rawKey);
+    localStorage.setItem(`nxr_project_key_${id}`, data.rawKey);
     success("Key generated!");
   };
 
@@ -288,6 +289,7 @@ export default function Keys() {
       const { data } = await api.post(`/keys/${keyId}/rotate`);
       setKeys((k) => k.map((x) => (x._id === keyId ? data.key : x)));
       setReveal(data.rawKey);
+      localStorage.setItem(`nxr_project_key_${id}`, data.rawKey);
       success("Key rotated!");
     } catch {
       toastErr("Failed to rotate.");

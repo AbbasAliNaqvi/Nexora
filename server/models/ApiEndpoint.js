@@ -22,6 +22,21 @@ const apiEndpointSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    mode: {
+      type: String,
+      enum: ["mock", "crud"],
+      default: "mock",
+    },
+    resource: {
+      collection: {
+        type: String,
+        default: null,
+      },
+      fields: {
+        type: mongoose.Schema.Types.Mixed,
+        default: [],
+      },
+    },
     mockResponse: {
       type: mongoose.Schema.Types.Mixed,
       default: { message: "OK", data: null },
