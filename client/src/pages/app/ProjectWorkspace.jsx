@@ -16,6 +16,9 @@ import {
 import { useToast } from "../../hooks/useToast";
 import "./ProjectWorkspace.css";
 
+const GATEWAY_BASE =
+  import.meta.env.VITE_GATEWAY_URL || `${window.location.origin}/gateway`;
+
 function toLocal(date) {
   return new Date(date).toLocaleDateString(undefined, {
     month: "short",
@@ -164,7 +167,7 @@ export default function ProjectWorkspace() {
             <div className="workspace-hero-side">
               <span className="workspace-side-label">Gateway</span>
               <code className="workspace-gateway">
-                {window.location.origin}/gateway/{project.slug}
+                {GATEWAY_BASE}/{project.slug}
               </code>
               <p className="workspace-side-copy">
                 Issue a key, hit this base path, and Nexora handles the gateway layer.

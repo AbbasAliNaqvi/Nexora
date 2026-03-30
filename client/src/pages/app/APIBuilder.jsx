@@ -23,6 +23,8 @@ import "./APIBuilder.css";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 const FIELD_TYPES = ["text", "email", "password", "number", "boolean"];
+const GATEWAY_BASE =
+  import.meta.env.VITE_GATEWAY_URL || `${window.location.origin}/gateway`;
 const CRUD_OPERATIONS = [
   {
     key: "list",
@@ -802,7 +804,7 @@ function CopyBtn({ text, title = "Copy" }) {
 function buildCurl(project, endpoint) {
   const lines = [
     `curl -X ${endpoint.method} \\`,
-    `  "${window.location.origin}/gateway/${project.slug}${endpoint.path}" \\`,
+    `  "${GATEWAY_BASE}/${project.slug}${endpoint.path}" \\`,
     '  -H "Content-Type: application/json" \\',
     '  -H "X-Api-Key: nxr_live_your_key"',
   ];
@@ -888,7 +890,7 @@ function EndpointTester({ endpoint, project }) {
       }, {});
 
       const response = await fetch(
-        `${window.location.origin}/gateway/${project.slug}${endpoint.path}`,
+        `${GATEWAY_BASE}/${project.slug}${endpoint.path}`,
         {
           method: endpoint.method,
           headers: {
