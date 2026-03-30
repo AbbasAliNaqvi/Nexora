@@ -214,7 +214,7 @@
 .section-label {
   display: inline-flex;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 5.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--brand);
@@ -224,7 +224,7 @@
   margin-top: 1rem;
   max-width: 14ch;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  font-size: clamp(2.4rem, 3vw, 4.6rem);
   line-height: 0.98;
   letter-spacing: -0.08em;
   color: var(--off-white);

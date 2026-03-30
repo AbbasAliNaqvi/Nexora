@@ -29,7 +29,11 @@ const IcZap = (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    <path d="M12 2C8 2 5 5 5 9c0 4 4 6 7 6s7-2 7-6c0-4-3-7-7-7z" />
+    <path d="M12 15v7" />
+    <path d="M8 19h8" />
+    <path d="M10 17v2" />
+    <path d="M14 17v2" />
   </svg>
 );
 const IcDoc = (
@@ -66,7 +70,7 @@ const IcHealth = (
 
 const WELCOME = {
   role: "assistant",
-  content: `Hey — I'm **Nexora AI**, your API co-pilot.\n\nI can help you:\n- 📄 Generate full API docs for any project\n- 🔍 Analyze API health and find issues\n- 💬 Answer any question about your APIs\n\nSelect a project above and ask me anything.`,
+  content: `Hey — I'm **Nexora AI**, your API co-pilot.\n\nI can help you:\n- Generate full API docs for any project\n- Analyze API health and find issues\n- Answer any question about your APIs\n\nSelect a project above and ask me anything.`,
 };
 
 function renderMd(text) {
@@ -310,7 +314,6 @@ export default function AIAssistant() {
           <div className="ai-logo">{IcZap}</div>
           <div>
             <div className="ai-header-title">AI Assistant</div>
-            <div className="ai-header-sub">Groq · LLaMA 3.3 70B</div>
           </div>
         </div>
         <div className="ai-header-right">

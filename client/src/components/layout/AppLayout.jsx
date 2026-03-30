@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FaSun, FaMoon } from "react-icons/fa";
+
 import useAuthStore from "../../../src/store/authStore";
 import useThemeStore from "../../store/themeStore";
+import logo from "../../assets/Nlogo.png";
 import "./AppLayout.css";
 
 const I = {
@@ -144,7 +147,7 @@ export default function AppLayout() {
       <aside className="sidebar">
         <div className="sidebar-top">
           <div className="sidebar-logo">
-            <span className="sidebar-logo-mark">NX</span>
+          <img src={logo} alt="NEXORA logo" className="logo-img-nex" />
             {!collapsed && (
               <div className="sidebar-logo-copy">
                 <span className="sidebar-logo-text">NEXORA</span>
@@ -197,14 +200,21 @@ export default function AppLayout() {
         </nav>
 
         <div className="sidebar-bottom">
-          <button className="sidebar-link" onClick={toggleTheme} type="button">
-            <span className="sidebar-link-icon">{I.theme}</span>
-            {!collapsed && (
-              <span className="sidebar-link-label">
-                {theme === "dark" ? "Switch to light" : "Switch to dark"}
-              </span>
-            )}
-          </button>
+<button
+  className="sidebar-link"
+  onClick={toggleTheme}
+  type="button"
+>
+  <span className="sidebar-link-icon">
+    {theme === "dark" ? <FaSun /> : <FaMoon />}
+  </span>
+
+  {!collapsed && (
+    <span className="sidebar-link-label">
+      {theme === "dark" ? "Switch to light" : "Switch to dark"}
+    </span>
+  )}
+</button>
 
           {!collapsed && user && (
             <div className="sidebar-user">
@@ -253,12 +263,18 @@ export default function AppLayout() {
                 type="button"
               >
                 <span className="mobile-nav-icon">{I[icon]}</span>
-                <span className="mobile-nav-label">{label}</span>
+                {/* <span className="mobile-nav-label">{label}</span> */}
               </button>
             );
           })}
-          <button className="mobile-nav-tab" onClick={toggleTheme} type="button">
-            <span className="mobile-nav-icon">{I.theme}</span>
+          <button
+            className="mobile-nav-tab"
+            onClick={toggleTheme}
+            type="button"
+          >
+            <span className="mobile-nav-icon">
+              {theme === "dark" ? <FaMoon size={16} /> : <FaSun size={16} />}
+            </span>
           </button>
         </div>
       </nav>

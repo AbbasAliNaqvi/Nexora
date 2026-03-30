@@ -3,8 +3,16 @@
   grid-template-columns: 280px 1fr;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(212, 161, 106, 0.16), transparent 24%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 90%, var(--brand) 10%) 0%, var(--bg) 100%);
+    radial-gradient(
+      circle at top left,
+      rgba(212, 161, 106, 0.16),
+      transparent 24%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 90%, var(--brand) 10%) 0%,
+      var(--bg) 100%
+    );
 }
 
 .app-shell.sidebar-collapsed {
@@ -35,7 +43,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.15rem 1rem 1rem;
+  padding: 1rem 1rem 1rem;
   flex-shrink: 0;
 }
 
@@ -46,6 +54,11 @@
   overflow: hidden;
 }
 
+.logo-img-nex{
+  display: block;      
+  width: 50px;         
+  margin: 0 auto; 
+}
 .sidebar-logo-mark {
   width: 42px;
   height: 42px;
@@ -276,7 +289,7 @@
     z-index: 100;
   }
 
-.mobile-nav-inner {
+  .mobile-nav-inner {
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -338,8 +351,8 @@
   }
 
   .mobile-nav-tab-active .mobile-nav-label {
-    max-width: 72px;
-    opacity: 1;
+    max-width: 100%;
+    opacity: 0;
   }
 }
 
@@ -361,7 +374,7 @@
   }
 
   .sidebar-top {
-    justify-content: center;
+    /* justify-content: center; */
     padding-inline: 0.2rem;
   }
 

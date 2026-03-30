@@ -26,11 +26,15 @@
   margin-right: auto;
 }
 
+.navbar-logo-img {
+  fill: #d4a16a; 
+}
+
 .navbar-logo-mark {
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: var(--text-1);
+  /* background: var(--text-1); */
   color: var(--bg);
   display: flex;
   align-items: center;

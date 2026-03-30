@@ -1,6 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
+import { FaSun, FaMoon } from "react-icons/fa";
+
 import useAuthStore from "../../store/authStore";
 import useThemeStore from "../../store/themeStore";
+import logo from "../../assets/Nlogo.png"; // adjust path if needed 
 import "./Navbar.css";
 
 const APP_TABS = [
@@ -17,7 +20,9 @@ function ThemeButton() {
   return (
     <button className="theme-toggle" onClick={toggleTheme} type="button">
       <span className="theme-toggle-track">
-        <span className="theme-toggle-icon">{theme === "dark" ? "D" : "L"}</span>
+        <span className="theme-toggle-icon">
+          {theme === "dark" ? <FaMoon /> : <FaSun />}
+        </span>
       </span>
       <span className="theme-toggle-label">
         {theme === "dark" ? "Dark" : "Light"}
@@ -25,7 +30,6 @@ function ThemeButton() {
     </button>
   );
 }
-
 export default function Navbar({ mode = "landing" }) {
   const location = useLocation();
   const { token } = useAuthStore();
@@ -34,7 +38,9 @@ export default function Navbar({ mode = "landing" }) {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
-          <span className="navbar-logo-mark">NX</span>
+          <span className="navbar-logo-mark">
+            <img src={logo} alt="NEXORA logo" className="navbar-logo-img" />
+          </span>
           <span className="navbar-logo-text">NEXORA</span>
         </Link>
 
