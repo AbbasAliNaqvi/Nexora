@@ -14,6 +14,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://nexora-cloud.vercel.app",
+      "https://nexora-abbasali.vercel.app",
     ],
     credentials: true,
   })
