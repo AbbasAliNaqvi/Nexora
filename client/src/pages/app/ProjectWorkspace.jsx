@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../lib/api";
+import { getGatewayBaseUrl } from "../../lib/backend";
 import {
   PageShell,
   PageHeader,
@@ -16,9 +17,6 @@ import {
 import { useToast } from "../../hooks/useToast";
 import "./ProjectWorkspace.css";
 
-const GATEWAY_BASE =
-  import.meta.env.VITE_GATEWAY_URL || `${window.location.origin}/gateway`;
-
 function toLocal(date) {
   return new Date(date).toLocaleDateString(undefined, {
     month: "short",
@@ -29,6 +27,7 @@ function toLocal(date) {
 
 export default function ProjectWorkspace() {
   const { id } = useParams();
+  const gatewayBase = getGatewayBaseUrl();
   const [project, setProject] = useState(null);
   const [meta, setMeta] = useState({ endpointCount: 0, keyCount: 0 });
   const [endpoints, setEndpoints] = useState([]);
@@ -167,7 +166,7 @@ export default function ProjectWorkspace() {
             <div className="workspace-hero-side">
               <span className="workspace-side-label">Gateway</span>
               <code className="workspace-gateway">
-                {GATEWAY_BASE}/{project.slug}
+                {gatewayBase}/{project.slug}
               </code>
               <p className="workspace-side-copy">
                 Issue a key, hit this base path, and Nexora handles the gateway layer.

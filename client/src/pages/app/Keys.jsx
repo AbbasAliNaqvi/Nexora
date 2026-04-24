@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../lib/api";
+import { getGatewayBaseUrl } from "../../lib/backend";
 import {
   PageShell,
   PageHeader,
@@ -245,6 +246,7 @@ function CreateKeyModal({ open, onClose, onCreate, projectId }) {
 
 export default function Keys() {
   const { id } = useParams();
+  const gatewayBase = getGatewayBaseUrl();
   const [project, setProject] = useState(null);
   const [keys, setKeys] = useState([]);
   const [loading, setLoad] = useState(true);
@@ -315,7 +317,7 @@ export default function Keys() {
           <code className="key-hint-code">X-Api-Key: nxr_live_...</code>
           <span className="key-hint-arrow">→</span>
           <span className="key-hint-path">
-            /gateway/{project.slug}/your-path
+            {gatewayBase}/{project.slug}/your-path
           </span>
         </div>
       )}

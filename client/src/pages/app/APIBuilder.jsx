@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../lib/api";
+import { fetchGateway, getGatewayBaseUrl } from "../../lib/backend";
 import {
   PageShell,
   PageHeader,
@@ -23,8 +24,6 @@ import "./APIBuilder.css";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 const FIELD_TYPES = ["text", "email", "password", "number", "boolean"];
-const GATEWAY_BASE =
-  import.meta.env.VITE_GATEWAY_URL || `${window.location.origin}/gateway`;
 const CRUD_OPERATIONS = [
   {
     key: "list",
@@ -802,9 +801,10 @@ function CopyBtn({ text, title = "Copy" }) {
 }
 
 function buildCurl(project, endpoint) {
+  const gatewayBase = getGatewayBaseUrl();
   const lines = [
     `curl -X ${endpoint.method} \\`,
-    `  "${GATEWAY_BASE}/${project.slug}${endpoint.path}" \\`,
+    `  "${gatewayBase}/${project.slug}${endpoint.path}" \\`,
     '  -H "Content-Type: application/json" \\',
     '  -H "X-Api-Key: nxr_live_your_key"',
   ];
@@ -889,20 +889,17 @@ function EndpointTester({ endpoint, project }) {
         return acc;
       }, {});
 
-      const response = await fetch(
-        `${GATEWAY_BASE}/${project.slug}${endpoint.path}`,
-        {
-          method: endpoint.method,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Api-Key": apiKey.trim(),
-          },
-          body:
-            ["POST", "PUT", "PATCH"].includes(endpoint.method)
-              ? JSON.stringify(body)
-              : undefined,
+      const response = await fetchGateway(`/${project.slug}${endpoint.path}`, {
+        method: endpoint.method,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Api-Key": apiKey.trim(),
         },
-      );
+        body:
+          ["POST", "PUT", "PATCH"].includes(endpoint.method)
+            ? JSON.stringify(body)
+            : undefined,
+      });
 
       const text = await response.text();
       let parsed;
@@ -1226,6 +1223,7 @@ function CrudModal({
 
 export default function APIBuilder() {
   const { id } = useParams();
+  const gatewayBase = getGatewayBaseUrl();
   const [project, setProject] = useState(null);
   const [endpoints, setEps] = useState([]);
   const [loading, setLoad] = useState(true);
@@ -1557,7 +1555,7 @@ export default function APIBuilder() {
 
                     <div className="ep-actions" onClick={(e) => e.stopPropagation()}>
                       <CopyBtn
-                        text={`${window.location.origin}/gateway/${project?.slug}${endpoint.path}`}
+                        text={`${gatewayBase}/${project?.slug}${endpoint.path}`}
                         title="Copy gateway URL"
                       />
                       <button
@@ -1599,7 +1597,7 @@ export default function APIBuilder() {
                         <div className="ep-detail-card">
                           <div className="ep-detail-label">Gateway URL</div>
                           <code className="ep-detail-code">
-                            {window.location.origin}/gateway/{project?.slug}
+                            {gatewayBase}/{project?.slug}
                             {endpoint.path}
                           </code>
                         </div>
